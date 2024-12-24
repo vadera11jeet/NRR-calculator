@@ -1,4 +1,4 @@
-module.successResponse = function (res, statusCode, data, message) {
+exports.successResponse = function (res, statusCode, data, message) {
   res.status(statusCode).json({
     data,
     message: message,
@@ -6,7 +6,7 @@ module.successResponse = function (res, statusCode, data, message) {
   });
 };
 
-module.errorResponse = function (res, statusCode, errorMessage) {
+exports.errorResponse = function (res, statusCode, errorMessage) {
   if (process.env.environment === "production" && statusCode >= 500) {
     errorMessage = "internal server error";
   }

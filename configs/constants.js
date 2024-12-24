@@ -1,5 +1,6 @@
 const POINTS_TABLE = [
   {
+    id: 1,
     rank: 1,
     team: "Chennai Super Kings",
     matches: 7,
@@ -11,6 +12,7 @@ const POINTS_TABLE = [
     points: 10,
   },
   {
+    id: 2,
     rank: 2,
     team: "Royal Challengers Bangalore",
     matches: 7,
@@ -22,6 +24,7 @@ const POINTS_TABLE = [
     points: 8,
   },
   {
+    id: 3,
     rank: 3,
     team: "Delhi Capitals",
     matches: 7,
@@ -33,6 +36,7 @@ const POINTS_TABLE = [
     points: 8,
   },
   {
+    id: 4,
     rank: 4,
     team: "Rajasthan Royals",
     matches: 7,
@@ -44,6 +48,7 @@ const POINTS_TABLE = [
     points: 6,
   },
   {
+    id: 5,
     rank: 5,
     team: "Mumbai Indians",
     matches: 8,
@@ -58,6 +63,7 @@ const POINTS_TABLE = [
 
 exports.IPL_TEAM_LIST = POINTS_TABLE.map((team) => team.team.toLowerCase());
 
+exports.POINTS_TABLE = POINTS_TABLE;
 exports.MINIMUM_NUMBER_OF_OVERS = 20;
 
 exports.MAXIMUM_NUMBER_OF_OVERS = 50;

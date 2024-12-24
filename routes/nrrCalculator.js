@@ -1,5 +1,5 @@
 const express = require("express");
-const catchAsync = require("../utils/CatchAsync");
+const catchAsync = require("../utils/catchAsync");
 const { calculateNrr } = require("../controllers/nrrController");
 const { validate } = require("../middleware");
 const nrrValidator = require("../middleware/nrrInputValidator");

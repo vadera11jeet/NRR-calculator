@@ -15,6 +15,7 @@ function defendingRunsUpperBound(
   let low = 0;
   let high = targetRuns - 1;
   let upperBound = 0;
+  let uNrr = 0;
 
   let { scoreRuns, battedOvers, considerRuns, bowledOvers } = teamScoreMatrix;
   let {
@@ -59,6 +60,7 @@ function defendingRunsUpperBound(
     if (teamNRR > desiredNRR) {
       upperBound = mid;
       low = mid;
+      uNrr = teamNRR;
     } else {
       high = mid;
     }
@@ -66,7 +68,7 @@ function defendingRunsUpperBound(
     prevMid = mid;
   }
 
-  return upperBound;
+  return { upperBound, uNrr };
 }
 
 function defendingRunsLowerBound(
@@ -81,6 +83,7 @@ function defendingRunsLowerBound(
   let low = 0;
   let high = highestSafeTotal;
   let lowerBound = 0;
+  let lNrr = 0;
 
   let { scoreRuns, battedOvers, considerRuns, bowledOvers } = teamScoreMatrix;
   let {
@@ -125,6 +128,7 @@ function defendingRunsLowerBound(
     if (teamNRR < desiredNRR) {
       lowerBound = mid;
       high = mid;
+      lNrr = teamNRR;
     } else {
       low = mid;
     }
@@ -132,7 +136,7 @@ function defendingRunsLowerBound(
     prevMid = mid;
   }
 
-  return lowerBound;
+  return { lowerBound, lNrr };
 }
 
 function chasingOverUpperBound(
@@ -141,81 +145,13 @@ function chasingOverUpperBound(
   teamScoreMatrix,
   oppositionTeamScoreMatrix,
   desiredNRR,
-  isOppDesired
-) {
-  let low = safeChaseBalls ?? 0;
-  let high = numberOfOvers * 6;
-  let upperBound = 0;
-
-  let { scoreRuns, battedOvers, considerRuns, bowledOvers } = teamScoreMatrix;
-  let {
-    scoreRuns: oTeamRuns,
-    battedOvers: oTeamBattedOvers,
-    considerRuns: oTeamConsiderRuns,
-    bowledOvers: oTeamBowledOvers,
-  } = oppositionTeamScoreMatrix;
-
-  scoreRuns += targetRuns + 1;
-  considerRuns += targetRuns;
-  bowledOvers += numberOfOvers;
-
-  oTeamRuns += targetRuns;
-  oTeamBattedOvers += numberOfOvers;
-  oTeamConsiderRuns += targetRuns + 1;
-
-  let prevMid = 0;
-  let midSameCounter = 0;
-
-  while (low < high) {
-    let mid = Math.floor(low + (high - low) / 2);
-    let leftBalls = (mid % 6) / 6;
-    let overs = Math.floor(mid / 6) + leftBalls;
-
-    if (mid === prevMid) midSameCounter++;
-    if (midSameCounter >= 3) break;
-
-    let teamNRR = calculateNRR(
-      scoreRuns,
-      battedOvers + overs,
-      considerRuns,
-      bowledOvers
-    ).toFixed(4);
-
-    let oTeamNRR = calculateNRR(
-      oTeamRuns,
-      oTeamBattedOvers,
-      oTeamConsiderRuns,
-      oTeamBowledOvers + overs
-    ).toFixed(4);
-
-    if (isOppDesired) {
-      desiredNRR = oTeamNRR;
-    }
-
-    if (teamNRR < desiredNRR) {
-      high = mid;
-      upperBound = mid;
-    } else {
-      low = mid;
-    }
-
-    prevMid = mid;
-  }
-
-  return upperBound;
-}
-
-function chasingOverLowerBound(
-  numberOfOvers,
-  targetRuns,
-  teamScoreMatrix,
-  oppositionTeamScoreMatrix,
-  desiredNRR,
-  isOppDesired
+  isOppDesired,
+  safeChaseBalls
 ) {
   let low = 0;
-  let high = numberOfOvers * 6;
-  let lowerBound = 0;
+  let high = safeChaseBalls - 1;
+  let upperBound = 0;
+  let uNrr = 0;
 
   let { scoreRuns, battedOvers, considerRuns, bowledOvers } = teamScoreMatrix;
   let {
@@ -264,15 +200,111 @@ function chasingOverLowerBound(
 
     if (teamNRR > desiredNRR) {
       low = mid;
-      upperBound = mid;
     } else {
+      upperBound = mid;
       high = mid;
+      uNrr = teamNRR;
     }
 
     prevMid = mid;
   }
 
-  return upperBound;
+  return {
+    upperBound: convertBallsToOver(upperBound),
+    uNrr,
+    numOfBalls: upperBound,
+  };
+}
+
+function chasingOverLowerBound(
+  numberOfOvers,
+  targetRuns,
+  teamScoreMatrix,
+  oppositionTeamScoreMatrix,
+  desiredNRR,
+  isOppDesired
+) {
+  let low = 0;
+  let high = numberOfOvers * 6;
+  let lowerBound = 0;
+  let lNrr = 0;
+
+  let { scoreRuns, battedOvers, considerRuns, bowledOvers } = teamScoreMatrix;
+  let {
+    scoreRuns: oTeamRuns,
+    battedOvers: oTeamBattedOvers,
+    considerRuns: oTeamConsiderRuns,
+    bowledOvers: oTeamBowledOvers,
+  } = oppositionTeamScoreMatrix;
+
+  scoreRuns += targetRuns + 1;
+  considerRuns += targetRuns;
+  bowledOvers += numberOfOvers;
+
+  oTeamRuns += targetRuns;
+  oTeamBattedOvers += numberOfOvers;
+  oTeamConsiderRuns += targetRuns + 1;
+
+  let prevMid = 0;
+  let midSameCounter = 0;
+
+  while (low < high) {
+    let mid = Math.floor(low + (high - low) / 2);
+    let leftBalls = (mid % 6) / 6;
+    let overs = Math.floor(mid / 6) + leftBalls;
+
+    if (mid === prevMid) midSameCounter++;
+    if (midSameCounter >= 3) break;
+
+    let teamNRR = calculateNRR(
+      scoreRuns,
+      battedOvers + overs,
+      considerRuns,
+      bowledOvers
+    ).toFixed(4);
+
+    let oTeamNRR = calculateNRR(
+      oTeamRuns,
+      oTeamBattedOvers,
+      oTeamConsiderRuns,
+      oTeamBowledOvers + overs
+    ).toFixed(4);
+
+    if (isOppDesired) {
+      desiredNRR = oTeamNRR;
+    }
+
+    if (teamNRR < desiredNRR) {
+      high = mid;
+      lowerBound = mid;
+      lNrr = teamNRR;
+    } else {
+      low = mid;
+    }
+
+    prevMid = mid;
+  }
+
+  return {
+    lowerBound: convertBallsToOver(lowerBound),
+    lNrr,
+    numOfBalls: lowerBound,
+  };
+}
+
+function convertBowingToPercentage(bowledOvers) {
+  if (bowledOvers - Math.floor(bowledOvers) > 0) {
+    const deliveredBalls = Math.ceil(
+      (bowledOvers - Math.floor(bowledOvers)) * 10
+    );
+    bowledOvers = Math.floor(bowledOvers) + deliveredBalls / 6;
+  }
+  return bowledOvers;
+}
+
+function convertBallsToOver(numberOfBalls) {
+  const numberOFOvers = `${Math.floor(numberOfBalls / 6)}.`;
+  return numberOFOvers + (numberOfBalls % 6);
 }
 
 module.exports = {
@@ -280,4 +312,6 @@ module.exports = {
   defendingRunsUpperBound,
   chasingOverUpperBound,
   chasingOverLowerBound,
+  convertBowingToPercentage,
+  convertBallsToOver,
 };

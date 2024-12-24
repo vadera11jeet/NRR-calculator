@@ -6,30 +6,16 @@ const {
 } = require("../configs/constants");
 
 const nrrValidator = [
-  body("teamName", "Team name is required")
-    .isString()
-    .withMessage("Team name must be string")
-    .bail()
-    .trim()
-    .toLowerCase()
-    .isIn(IPL_TEAM_LIST)
-    .withMessage(`Team name must be from the given list ${IPL_TEAM_LIST}`),
+  body("teamId", "Team id is required"),
 
-  body("oppositionTeamName", "Opposition team name is required")
-    .isString()
-    .withMessage("Opposition team name must be string")
-    .bail()
-    .trim()
-    .toLowerCase()
-    .isIn(IPL_TEAM_LIST)
-    .withMessage(`Team name must be from the given list ${IPL_TEAM_LIST}`)
-    .bail()
-    .custom((value, { req }) => {
-      if (value === req.body.teamName) {
+  body("oppositionTeamId", "Opposition team id is required").custom(
+    (value, { req }) => {
+      if (value == req.body.teamId) {
         throw new Error("Team name and opposition team name must not be same");
       }
       return true;
-    }),
+    }
+  ),
 
   body("numberOfOvers", "Number of overs are required")
     .isInt({ min: MINIMUM_NUMBER_OF_OVERS, max: MAXIMUM_NUMBER_OF_OVERS })
@@ -56,7 +42,7 @@ const nrrValidator = [
     .withMessage("Total run scored is must be integer and non negative value"), // ignoring penalty runs
 
   body("targetRuns")
-    .if((value, { req }) => !req.body.isBattedFirst)
+    .if((value, { req }) => req.body.isBattedFirst === false)
     .notEmpty()
     .withMessage("Target must not be empty when you haven't batted first")
     .bail()
