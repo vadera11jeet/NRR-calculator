@@ -139,14 +139,14 @@ function defendingRunsLowerBound(
   return { lowerBound, lNrr };
 }
 
-function chasingOverUpperBound(
+function chasingOverLowerBound(
   numberOfOvers,
   targetRuns,
   teamScoreMatrix,
   oppositionTeamScoreMatrix,
   desiredNRR,
-  isOppDesired,
-  safeChaseBalls
+  safeChaseBalls = numberOfOvers * 6,
+  isOppDesired
 ) {
   let low = 0;
   let high = safeChaseBalls - 1;
@@ -210,13 +210,13 @@ function chasingOverUpperBound(
   }
 
   return {
-    upperBound: convertBallsToOver(upperBound),
-    uNrr,
     numOfBalls: upperBound,
+    uNrr,
+    upperBound: convertBallsToOver(upperBound),
   };
 }
 
-function chasingOverLowerBound(
+function chasingOverUpperBound(
   numberOfOvers,
   targetRuns,
   teamScoreMatrix,
@@ -286,9 +286,9 @@ function chasingOverLowerBound(
   }
 
   return {
-    lowerBound: convertBallsToOver(lowerBound),
+    numberOfBalls: lowerBound,
     lNrr,
-    numOfBalls: lowerBound,
+    lowerBound: convertBallsToOver(lowerBound),
   };
 }
 

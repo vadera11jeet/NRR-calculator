@@ -46,8 +46,17 @@ exports.calculateNrr = async function (req, res, next) {
   );
 
   // checking if desired team already below our current ranking
-  if (desiredTeamInfo.rank > teamInfo.rank) {
+  if (desiredTeamInfo.rank > teamInfo.rank || teamInfo.rank === 1) {
     return successResponse(res, status.OK, undefined, "Just win the match");
+  }
+
+  if (teamInfo.points + 2 < desiredTeamInfo.points) {
+    return successResponse(
+      res,
+      status.OK,
+      undefined,
+      "There is no chance to reach your desire position."
+    );
   }
 
   const desiredUpperRankInfo =
@@ -151,29 +160,28 @@ exports.calculateNrr = async function (req, res, next) {
       teamInfo.rank < oTeamInfo.rank &&
       desiredTeamInfo.rank < teamInfo.rank
     ) {
-      const maximumSafeChasingBalls = chasingOverLowerBound(
+      const maximumSafeChasingBalls = chasingOverUpperBound(
         overs,
         targetRuns,
         teamScoreMatrix,
         oppositionTeamScoreMatrix,
-        desiredUpperRankInfo.nrr
+        desiredTeamInfo.nrr
       );
 
       const minimumSafeChasingBalls = desiredUpperRankInfo
-        ? chasingOverUpperBound(
+        ? chasingOverLowerBound(
             overs,
             targetRuns,
             teamScoreMatrix,
             oppositionTeamScoreMatrix,
             desiredUpperRankInfo.nrr,
-            false,
-            maximumSafeChasingBalls.numOfBalls
+            maximumSafeChasingBalls.numberOfBalls
           )
         : null;
 
       return successResponse(res, status.OK, {
         lowerBound: maximumSafeChasingBalls,
-        upperBound: minimumSafeChasingBalls.upperBound,
+        upperBound: minimumSafeChasingBalls,
       });
     } else if (
       teamInfo.rank > oTeamInfo.rank &&
@@ -181,27 +189,24 @@ exports.calculateNrr = async function (req, res, next) {
         (desiredUpperRankInfo &&
           desiredTeamInfo.rank == desiredUpperRankInfo.rank))
     ) {
-      const maximumSafeChasingBalls = chasingOverLowerBound(
+      const maximumSafeChasingBalls = chasingOverUpperBound(
         overs,
         targetRuns,
         teamScoreMatrix,
         oppositionTeamScoreMatrix,
-        desiredTeamInfo.nrr
-        // oTeamInfo.rank === desiredTeamInfo.rank
+        desiredTeamInfo.nrr,
+        oTeamInfo.rank === desiredTeamInfo.rank && oTeamInfo.nrr > teamInfo.nrr
       );
-
       const minimumSafeChasingBalls = desiredUpperRankInfo
-        ? chasingOverUpperBound(
+        ? chasingOverLowerBound(
             overs,
             targetRuns,
             teamScoreMatrix,
             oppositionTeamScoreMatrix,
             desiredUpperRankInfo.nrr,
-            // oTeamInfo.rank === desiredTeamInfo.rank,
-            // desiredUpperRankInfo &&
-            //   desiredTeamInfo.rank == desiredUpperRankInfo.rank,
-            false,
-            maximumSafeChasingBalls.numOfBalls
+            maximumSafeChasingBalls.numberOfBalls,
+            desiredUpperRankInfo &&
+              desiredTeamInfo.rank == desiredUpperRankInfo.rank
           )
         : null;
       return successResponse(res, status.OK, {
@@ -212,23 +217,21 @@ exports.calculateNrr = async function (req, res, next) {
       teamInfo.rank > oTeamInfo.rank &&
       oTeamInfo.rank < desiredTeamInfo.rank
     ) {
-      const maximumSafeChasingBalls = chasingOverLowerBound(
+      const maximumSafeChasingBalls = chasingOverUpperBound(
         overs,
         targetRuns,
         teamScoreMatrix,
         oppositionTeamScoreMatrix,
-        desiredTeamInfo.nrr,
-        true
+        desiredTeamInfo.nrr
       );
 
       const minimumSafeChasingBalls = desiredUpperRankInfo
-        ? chasingOverUpperBound(
+        ? chasingOverLowerBound(
             overs,
             targetRuns,
             teamScoreMatrix,
             oppositionTeamScoreMatrix,
             desiredUpperRankInfo.nrr,
-            false,
             maximumSafeChasingBalls.numOfBalls
           )
         : null;
@@ -239,6 +242,4 @@ exports.calculateNrr = async function (req, res, next) {
       });
     }
   }
-
-  // return res.send(200).send("hello world");
 };
