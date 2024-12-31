@@ -186,8 +186,7 @@ exports.calculateNrr = async function (req, res, next) {
     } else if (
       teamInfo.rank > oTeamInfo.rank &&
       (oTeamInfo.rank === desiredTeamInfo.rank ||
-        (desiredUpperRankInfo &&
-          desiredTeamInfo.rank == desiredUpperRankInfo.rank))
+        (desiredUpperRankInfo && oTeamInfo.rank == desiredUpperRankInfo.rank))
     ) {
       const maximumSafeChasingBalls = chasingOverUpperBound(
         overs,
@@ -195,8 +194,9 @@ exports.calculateNrr = async function (req, res, next) {
         teamScoreMatrix,
         oppositionTeamScoreMatrix,
         desiredTeamInfo.nrr,
-        oTeamInfo.rank === desiredTeamInfo.rank && oTeamInfo.nrr > teamInfo.nrr
+        oTeamInfo.rank === desiredTeamInfo.rank
       );
+
       const minimumSafeChasingBalls = desiredUpperRankInfo
         ? chasingOverLowerBound(
             overs,
@@ -205,8 +205,7 @@ exports.calculateNrr = async function (req, res, next) {
             oppositionTeamScoreMatrix,
             desiredUpperRankInfo.nrr,
             maximumSafeChasingBalls.numberOfBalls,
-            desiredUpperRankInfo &&
-              desiredTeamInfo.rank == desiredUpperRankInfo.rank
+            desiredUpperRankInfo && oTeamInfo.rank == desiredUpperRankInfo.rank
           )
         : null;
       return successResponse(res, status.OK, {
