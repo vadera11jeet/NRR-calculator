@@ -198,7 +198,7 @@ function chasingOverLowerBound(
       desiredNRR = oTeamNRR;
     }
 
-    if (teamNRR > desiredNRR) {
+    if (teamNRR >= desiredNRR) {
       low = mid;
     } else {
       upperBound = mid;
@@ -248,8 +248,8 @@ function chasingOverUpperBound(
   let prevMid = 0;
   let midSameCounter = 0;
 
-  while (low < high) {
-    let mid = Math.floor(low + (high - low) / 2);
+  while (low <= high) {
+    let mid = Math.ceil(low + (high - low) / 2);
     let leftBalls = (mid % 6) / 6;
     let overs = Math.floor(mid / 6) + leftBalls;
 
@@ -276,10 +276,10 @@ function chasingOverUpperBound(
 
     if (teamNRR < desiredNRR) {
       high = mid;
-      lowerBound = mid;
-      lNrr = teamNRR;
     } else {
       low = mid;
+      lowerBound = mid;
+      lNrr = teamNRR;
     }
 
     prevMid = mid;
