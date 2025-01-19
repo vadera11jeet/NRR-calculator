@@ -12,7 +12,7 @@ const app = express();
 
 app.use(express.json());
 
-const whiteList = ["http:localhost:3000", "http://localhost:5173"];
+const whiteList = ["http://localhost:3000", "http://localhost:5173"];
 
 const corsOptions = {
   origin: function (origin, callback) {
